@@ -149,8 +149,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tailleMax: {x: 100, y: 100, z: 100}
-  maxProfondeur: 3
-  rayon: 15
+  maxProfondeur: 5
+  rayon: 50
   center: {x: 0, y: 0, z: 0}
 --- !u!4 &293502732
 Transform:
