@@ -129,6 +129,20 @@ public class Octree : MonoBehaviour
                 inBounds++;
             }
         }
+
+        //Vecteur entre sphere et cube
+        Vector3 vect = voxel.delimitation.center - sp.center;
+
+        //ppp = point le plus proche
+        Vector3 ppp = vect.normalized * sp.rayon;
+
+
+
+        if (voxel.delimitation.ClosestPoint(ppp) == ppp)
+        {
+            inBounds++;
+        }
+
         if (inBounds == 8 )
         {
             voxel.plein = 1;
@@ -137,18 +151,6 @@ public class Octree : MonoBehaviour
         }
         if (inBounds == 0)
         {
-            //Vecteur entre sphere et cube
-            Vector3 vect = voxel.delimitation.center -  sp.center;
-
-            //ppp = point le plus proche
-            Vector3 ppp = vect.normalized * sp.rayon; 
-            
-
-
-            if (voxel.delimitation.ClosestPoint(ppp) == ppp)
-            {
-                inBounds++;
-            }
 
             voxel.plein = 0;
             voxel.enfants = null;
