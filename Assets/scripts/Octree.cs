@@ -102,7 +102,7 @@ public class Octree : MonoBehaviour
         voxelInSphere(node,sp);
         if (!node.voxel())
         {
-            for (int i = 0; i < node.enfants.Length; i++)
+            for (int i = 0; i < NB_ENFANTS; i++)
             {
                 buildSphere(node.enfants[i], sp);
             }
@@ -138,16 +138,18 @@ public class Octree : MonoBehaviour
 
 
 
-        if (voxel.delimitation.ClosestPoint(ppp) == ppp)
-        {
-            inBounds++;
-        }
+        
 
         if (inBounds == 8 )
         {
             voxel.plein = 1;
             voxel.enfants = null;
             voxel.profondeur = 0;
+        }
+
+        if (voxel.delimitation.ClosestPoint(ppp) == ppp)
+        {
+            inBounds++;
         }
         if (inBounds == 0)
         {
