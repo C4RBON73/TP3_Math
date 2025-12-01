@@ -16,7 +16,12 @@ public class Octree : MonoBehaviour
     [SerializeField] sphereOctree[] l_sphere;
 
 
-
+    private enum Operation
+    {
+        None,
+        Inetrsection,
+        Union
+    };
 
     public class sphereOctree
     {
@@ -182,13 +187,13 @@ public class Octree : MonoBehaviour
 
     void initSphere()
     {
-        l_sphere = new sphereOctree[2];
+        l_sphere = new sphereOctree[3];
         sphereOctree s1 = new sphereOctree(10, new Vector3(0,0,0));
         sphereOctree s2 = new sphereOctree(10, new Vector3(20, 0, 0));
-        //sphereOctree s3 = new sphereOctree(10, new Vector3(20, 0, 20));
+        sphereOctree s3 = new sphereOctree(10, new Vector3(20, 0, 20));
         l_sphere[0] = s1;
         l_sphere[1] = s2;
-        //l_sphere[2] = s3;
+        l_sphere[2] = s3;
 
     }
 
