@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using Unity.VisualScripting;
+using UnityEditor.iOS.Xcode;
 using UnityEngine;
 
 
@@ -11,8 +13,10 @@ public class Octree : MonoBehaviour
     Nodes racine;
     Bounds delimitation;
 
-    [SerializeField] public float rayon;
-    [SerializeField] public Vector3 center;
+    [SerializeField] sphereOctree[] l_sphere;
+
+
+
 
     public class sphereOctree
     {
@@ -43,7 +47,7 @@ public class Octree : MonoBehaviour
 
         public Nodes(int prof, Bounds delim, int plei)
         {
-            Debug.Log("Création d'un Nodes à la profondeur " + prof + " de type " + plei + " centré en " + delim.center + " et de taille " + delim.size);
+            //Debug.Log("Création d'un Nodes à la profondeur " + prof + " de type " + plei + " centré en " + delim.center + " et de taille " + delim.size);
             delimitation = delim;
             profondeur = prof;
 
@@ -97,7 +101,7 @@ public class Octree : MonoBehaviour
 
     }
 
-    private void buildSphere( Nodes node, sphereOctree sp)
+    private void buildSphere( Nodes node, sphereOctree[] sp)
     {
         voxelInSphere(node,sp);
         if (!node.voxel())
@@ -112,64 +116,95 @@ public class Octree : MonoBehaviour
 
     }
 
-    private void voxelInSphere(Nodes voxel, sphereOctree sp)
+    private void voxelInSphere(Nodes voxel, sphereOctree[] sp)
     {
         float x, y, z;
-        int inBounds = 0;
-        for(int i = 0; i < 8; i++)
+
+        int nbSphereBounds = 0;
+        for (int j = 0; j < sp.Length; j++)
         {
-            x = ((i == 1) || (i == 2) || (i == 5) || (i == 6)) ? voxel.delimitation.center.x + voxel.delimitation.size.x : voxel.delimitation.center.x;
-            y = (i < 4) ? voxel.delimitation.center.y + voxel.delimitation.size.y : voxel.delimitation.center.y;
-            z = ((i % 4) - 2 >= 0) ? voxel.delimitation.center.z + voxel.delimitation.size.z : voxel.delimitation.center.z;
-            
-            
-            float pos = Mathf.Pow(x - sp.center.x, 2) + Mathf.Pow(y - sp.center.y, 2) + Mathf.Pow(z - sp.center.z, 2);
-            if (pos < Mathf.Pow(sp.rayon, 2))
+            int inBounds = 0;
+            for (int i = 0; i < NB_ENFANTS; i++)
             {
-                inBounds++;
+
+                x = ((i == 1) || (i == 2) || (i == 5) || (i == 6)) ? voxel.delimitation.center.x + voxel.delimitation.size.x : voxel.delimitation.center.x;
+                y = (i < 4) ? voxel.delimitation.center.y + voxel.delimitation.size.y : voxel.delimitation.center.y;
+                z = ((i % 4) - 2 >= 0) ? voxel.delimitation.center.z + voxel.delimitation.size.z : voxel.delimitation.center.z;
+
+
+                float pos = Mathf.Pow(x - sp[j].center.x, 2) + Mathf.Pow(y - sp[j].center.y, 2) + Mathf.Pow(z - sp[j].center.z, 2);
+                if (pos < Mathf.Pow(sp[j].rayon, 2))
+                {
+                    inBounds++;
+                }
             }
+
+
+
+            //Vecteur entre sphere et cube
+            Vector3 vect = voxel.delimitation.center - sp[j].center;
+
+            //ppp = point le plus proche
+            Vector3 ppp = vect.normalized * sp[j].rayon;
+
+
+
+
+
+            if (inBounds == 8)
+            {
+                nbSphereBounds++;
+            }
+
+            if (voxel.delimitation.ClosestPoint(ppp) == ppp)
+            {
+                //TODO :Si a profondeurMax on crée des enfants
+                
+            }
+
         }
-
-        //Vecteur entre sphere et cube
-        Vector3 vect = voxel.delimitation.center - sp.center;
-
-        //ppp = point le plus proche
-        Vector3 ppp = vect.normalized * sp.rayon;
-
-
-
-        
-
-        if (inBounds == 8 )
+        if (nbSphereBounds > 0)
         {
             voxel.plein = 1;
             voxel.enfants = null;
             voxel.profondeur = 0;
         }
-
-        if (voxel.delimitation.ClosestPoint(ppp) == ppp)
+        else
         {
-            inBounds++;
-        }
-        if (inBounds == 0)
-        {
-
-            voxel.plein = 0;
-            voxel.enfants = null;
-            voxel.profondeur = 0;
+            if( voxel.profondeur ==0)
+            {
+                voxel.plein = 0;
+                voxel.enfants = null;
+            }
         }
 
+    }
 
+    void initSphere()
+    {
+        l_sphere = new sphereOctree[2];
+        sphereOctree s1 = new sphereOctree(10, new Vector3(0,0,0));
+        sphereOctree s2 = new sphereOctree(10, new Vector3(20, 0, 0));
+        //sphereOctree s3 = new sphereOctree(10, new Vector3(20, 0, 20));
+        l_sphere[0] = s1;
+        l_sphere[1] = s2;
+        //l_sphere[2] = s3;
 
     }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        initSphere();
+
         delimitation = new Bounds(transform.position,tailleMax );
-        racine = new Nodes(maxProfondeur, delimitation, 0);
-        sphereOctree sphere = new sphereOctree(rayon, center);
-        buildSphere(racine, sphere);
+        racine = new Nodes(maxProfondeur, delimitation, 1);
+        
+
+        buildSphere(racine, l_sphere);
+
+
+        
         renderOctree(racine);
     }
 
